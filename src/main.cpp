@@ -8,7 +8,8 @@
 */
 
 #include <ESP8266WiFi.h>
-#define TriggerTime 400
+#define TriggerTime 800
+#define RelaiPin D1
 // #define DEBUG
 
 const char *ssid = "MP_Flur";
@@ -26,10 +27,13 @@ void setup()
 
   // heardbeat LED setup
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  pinMode(2, OUTPUT);
+  digitalWrite(2, HIGH);
 
   // prepare GPIO2 - D4 output - ment as relai port
-  pinMode(2, OUTPUT);
-  digitalWrite(2, 0);
+  pinMode(RelaiPin, OUTPUT);
+  digitalWrite(RelaiPin, LOW);
 
   // Connect to WiFi network
   Serial.println();
@@ -38,7 +42,7 @@ void setup()
   Serial.println(ssid);
 
   WiFi.mode(WIFI_STA);
-  WiFi.hostname("JPRF_DoorBell");
+  WiFi.hostname("iot-doorbell");
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED)
@@ -84,7 +88,7 @@ void loop()
 
   // Match the request
   int val;
-  if (req.indexOf("/gpio/2") != -1)
+  if (req.indexOf("/hish2chai") != -1)
   {
     val = 2;
   }
@@ -97,17 +101,17 @@ void loop()
     return;
   }
 
-  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
+  String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n";
 
   if (val == 2)
   { 
-    digitalWrite(2, !digitalRead(2));
+    digitalWrite(RelaiPin, HIGH);
     delay(TriggerTime);
-    digitalWrite(2, !digitalRead(2));
+    digitalWrite(RelaiPin, LOW);
 
     client.flush();
 
-    s += "trigered";
+    s += "Welcome home";
   }
 
   s += "</html>\n";
@@ -119,7 +123,7 @@ void loop()
 
   // The client will actually be disconnected
   // when the function returns and 'client' object is detroyed
-  digitalWrite(LED_BUILTIN, 1);
+  // digitalWrite(LED_BUILTIN, 1);
 #ifdef DEBUG
   Serial.println(255.0 / (-1.0 * WiFi.RSSI() - 16));
 #endif
