@@ -12,7 +12,7 @@
 // #define DEBUG
 
 const char *ssid = "MP_Flur";
-const char *password = "****";
+const char *password = "";
 
 // Create an instance of the server
 // specify the port to listen on as an argument
@@ -84,15 +84,7 @@ void loop()
 
   // Match the request
   int val;
-  if (req.indexOf("/gpio/0") != -1)
-  {
-    val = 0;
-  }
-  else if (req.indexOf("/gpio/1") != -1)
-  {
-    val = 1;
-  }
-  else if (req.indexOf("/gpio/2") != -1)
+  if (req.indexOf("/gpio/2") != -1)
   {
     val = 2;
   }
@@ -107,18 +99,8 @@ void loop()
 
   String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
 
-  if (val <= 1)
-  {
-    // Set GPIO2 according to the request
-    digitalWrite(2, val);
-    client.flush();
-
-    // Prepare the response
-    s += (val) ? "high" : "low";
-    // Send the response to the client
-  }
-  else
-  { //TODO
+  if (val == 2)
+  { 
     digitalWrite(2, !digitalRead(2));
     delay(TriggerTime);
     digitalWrite(2, !digitalRead(2));
