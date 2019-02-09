@@ -11,17 +11,17 @@
 #define TriggerTime 400
 // #define DEBUG
 
-const char* ssid = "MP_Flur";
-const char* password = "****";
+const char *ssid = "MP_Flur";
+const char *password = "****";
 
 // Create an instance of the server
 // specify the port to listen on as an argument
 WiFiServer server(80);
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  
-  
+
   delay(10);
 
   // heardbeat LED setup
@@ -41,7 +41,8 @@ void setup() {
   WiFi.hostname("JPRF_DoorBell");
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.print(".");
   }
@@ -51,60 +52,73 @@ void setup() {
   // Start the server
   server.begin();
   Serial.println("Server started");
-  
+
   // Print the IP address
   Serial.println(WiFi.localIP());
 }
 
-void loop() {
+void loop()
+{
   // Check if a client has connected
   WiFiClient client = server.available();
-  if (!client) {
+  if (!client)
+  {
     return;
   }
 
-  // Wait until the client sends some data
-  #ifdef DEBUG
+// Wait until the client sends some data
+#ifdef DEBUG
   Serial.println("new client");
-  #endif
-  while (!client.available()) {
+#endif
+  while (!client.available())
+  {
     delay(1);
   }
 
   // Read the first line of the request
   String req = client.readStringUntil('\r');
-  #ifdef DEBUG
+#ifdef DEBUG
   Serial.println(req);
-  #endif
+#endif
   client.flush();
 
   // Match the request
   int val;
-  if (req.indexOf("/gpio/0") != -1) {
+  if (req.indexOf("/gpio/0") != -1)
+  {
     val = 0;
-  } else if (req.indexOf("/gpio/1") != -1) {
+  }
+  else if (req.indexOf("/gpio/1") != -1)
+  {
     val = 1;
-  } else if (req.indexOf("/gpio/2") != -1) {
+  }
+  else if (req.indexOf("/gpio/2") != -1)
+  {
     val = 2;
-  } else {
-    #ifdef DEBUG
+  }
+  else
+  {
+#ifdef DEBUG
     Serial.println("invalid request");
-    #endif
+#endif
     client.stop();
     return;
   }
 
   String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\nGPIO is now ";
 
-  if(val <= 1){
-  // Set GPIO2 according to the request
+  if (val <= 1)
+  {
+    // Set GPIO2 according to the request
     digitalWrite(2, val);
     client.flush();
 
     // Prepare the response
     s += (val) ? "high" : "low";
     // Send the response to the client
-  } else{ //TODO
+  }
+  else
+  { //TODO
     digitalWrite(2, !digitalRead(2));
     delay(TriggerTime);
     digitalWrite(2, !digitalRead(2));
@@ -114,19 +128,18 @@ void loop() {
     s += "trigered";
   }
 
-    s += "</html>\n";
-    client.print(s);
-    delay(1);
-    #ifdef DEBUG
-    Serial.println("Client disonnected");
-    #endif
+  s += "</html>\n";
+  client.print(s);
+  delay(1);
+#ifdef DEBUG
+  Serial.println("Client disonnected");
+#endif
 
   // The client will actually be disconnected
   // when the function returns and 'client' object is detroyed
   digitalWrite(LED_BUILTIN, 1);
-  #ifdef DEBUG
+#ifdef DEBUG
   Serial.println(255.0 / (-1.0 * WiFi.RSSI() - 16));
-  #endif
+#endif
   // analogWrite(LED_BUILTIN, 255 / (-1 * WiFi.RSSI()));
 }
-
